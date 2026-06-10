@@ -1,0 +1,128 @@
+const d = document.getElementById("history-container")
+  , u = document.getElementById("history-empty")
+  , v = document.getElementById("history-actions")
+  , p = document.getElementById("clear-history-btn")
+  , m = document.getElementById("export-json-btn")
+  , g = document.getElementById("export-csv-btn");
+function y(n) {
+    const o = new Date
+      , t = new Date(n)
+      , e = Math.floor((o - t) / 1e3);
+    return e < 60 ? "Baru saja" : e < 3600 ? Math.floor(e / 60) + " menit lalu" : e < 86400 ? Math.floor(e / 3600) + " jam lalu" : Math.floor(e / 86400) + " hari lalu"
+}
+function h(n) {
+    const o = document.createElement("div");
+    return o.textContent = n,
+    o.innerHTML
+}
+function s() {
+    try {
+        const n = JSON.parse(localStorage.getItem("scanHistory") || "[]");
+        d.querySelectorAll(".history-item").forEach(function(t) {
+            t.remove()
+        }),
+        n.length > 0 ? (u.classList.add("hidden"),
+        v.classList.remove("hidden"),
+        n.forEach(function(t, e) {
+            var a = document.createElement("div");
+            a.className = "history-item flex items-center gap-3 p-3 sm:p-4 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors group";
+            var r = h(t.title || "Hasil Scan")
+              , i = h(t.text || "")
+              , c = i.length > 40 ? i.substring(0, 40) + "..." : i
+              , l = i.replace(/"/g, "&quot;");
+            a.innerHTML = '<div class="flex-shrink-0">  <div class="w-10 h-10 rounded-xl flex items-center justify-center ' + (t.icon || "bg-slate-200 text-slate-700 dark:bg-slate-700 dark:text-slate-300") + '">    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>  </div></div><div class="flex-1 min-w-0 py-1">  <div class="text-sm font-bold text-slate-800 dark:text-white truncate">' + c + '</div>  <div class="flex justify-between items-center mt-1">     <span class="text-xs text-slate-500 dark:text-slate-400">' + r + '</span>     <span class="text-[10px] text-slate-400 dark:text-slate-500">' + y(t.time) + '</span>  </div></div><div class="flex items-center gap-1 flex-shrink-0 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">  <button class="restore-history-btn text-slate-400 hover:text-green-600 dark:hover:text-green-400 p-2 rounded-lg hover:bg-green-50 dark:hover:bg-green-900/30 transition-all active:scale-90" title="Tampilkan Kembali" data-text="' + l + '">    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>  </button>  <button class="copy-history-btn text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 p-2 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-all active:scale-90" title="Salin Teks" data-text="' + l + '">    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>  </button>  <button class="delete-history-btn text-slate-400 hover:text-red-500 p-2 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/30 transition-all active:scale-90" title="Hapus" data-index="' + e + '">    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>  </button></div>',
+            d.appendChild(a)
+        }),
+        document.querySelectorAll(".restore-history-btn").forEach(function(t) {
+            t.addEventListener("click", function(e) {
+                e.stopPropagation();
+                var a = t.getAttribute("data-text");
+                window.restoreHistoryItem && (window.restoreHistoryItem(a, null),
+                window.scrollTo({
+                    top: 0,
+                    behavior: "smooth"
+                }))
+            })
+        }),
+        document.querySelectorAll(".copy-history-btn").forEach(function(t) {
+            t.addEventListener("click", function(e) {
+                e.stopPropagation();
+                var a = t.getAttribute("data-text");
+                navigator.clipboard.writeText(a).then(function() {
+                    var r = t.innerHTML;
+                    t.innerHTML = '<svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>',
+                    setTimeout(function() {
+                        t.innerHTML = r
+                    }, 1500)
+                })
+            })
+        }),
+        document.querySelectorAll(".delete-history-btn").forEach(function(t) {
+            t.addEventListener("click", function(e) {
+                e.stopPropagation();
+                var a = parseInt(t.getAttribute("data-index"))
+                  , r = JSON.parse(localStorage.getItem("scanHistory") || "[]");
+                r.splice(a, 1),
+                localStorage.setItem("scanHistory", JSON.stringify(r)),
+                s()
+            })
+        })) : (u.classList.remove("hidden"),
+        v.classList.add("hidden"))
+    } catch (n) {
+        console.error("Error loading history", n)
+    }
+}
+m.addEventListener("click", function() {
+    var n = JSON.parse(localStorage.getItem("scanHistory") || "[]");
+    if (n.length === 0) {
+        alert("Tidak ada data untuk diekspor");
+        return
+    }
+    var o = n.map(function(r) {
+        return {
+            time: r.time,
+            title: r.title,
+            type: r.type,
+            text: r.text
+        }
+    })
+      , t = JSON.stringify(o, null, 2)
+      , e = "data:application/json;charset=utf-8," + encodeURIComponent(t)
+      , a = document.createElement("a");
+    a.href = e,
+    a.download = "scan-history-" + new Date().toISOString().slice(0, 10) + ".json",
+    document.body.appendChild(a),
+    a.click(),
+    document.body.removeChild(a)
+});
+g.addEventListener("click", function() {
+    var n = JSON.parse(localStorage.getItem("scanHistory") || "[]");
+    if (n.length === 0) {
+        alert("Tidak ada data untuk diekspor");
+        return
+    }
+    var o = `Waktu,Judul,Tipe,Teks
+`;
+    n.forEach(function(a) {
+        var r = (a.time || "").replace(/"/g, '""')
+          , i = (a.title || "").replace(/"/g, '""')
+          , c = (a.type || "").replace(/"/g, '""')
+          , l = (a.text || "").replace(/"/g, '""');
+        o += '"' + r + '","' + i + '","' + c + '","' + l + `"
+`
+    });
+    var t = "data:text/csv;charset=utf-8," + encodeURIComponent(o)
+      , e = document.createElement("a");
+    e.href = t,
+    e.download = "scan-history-" + new Date().toISOString().slice(0, 10) + ".csv",
+    document.body.appendChild(e),
+    e.click(),
+    document.body.removeChild(e)
+});
+p.addEventListener("click", function() {
+    confirm("Apakah Anda yakin ingin menghapus semua riwayat?") && (localStorage.removeItem("scanHistory"),
+    s())
+});
+window.addEventListener("historyUpdated", s);
+document.addEventListener("astro:page-load", s);
+window.addEventListener("load", s);
